@@ -112,16 +112,16 @@ class TransformerLayer_Rt(nn.Module):
         self.dropout2 = nn.Dropout(dropout)
 
     def forward(self, seq, mask=None):
-        # 自注意层
+        # Self-attention layer
         context = self.masked_attn_head(seq, seq, seq, mask)
         context = self.layer_norm1(self.dropout1(context) + seq)
 
-        # FFN层
+        # Feedforward network (FFN) layer
         output = self.linear1(context).relu()
         output = self.linear2(output)
         output = self.layer_norm2(self.dropout2(output) + context)
 
-        # 频域分析层
+        # Frequency domain analysis layer
         context = self.layer_norm2(context)
         output_t = self.linear_t1(context).relu()
         output_t = self.linear_t2(output)
