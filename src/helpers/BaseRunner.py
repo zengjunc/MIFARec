@@ -63,7 +63,7 @@ class BaseRunner(object):
         evaluations = dict()
         # sort_idx = (-predictions).argsort(axis=1)
         # gt_rank = np.argwhere(sort_idx == 0)[:, 1] + 1
-        # ↓ As we only have one positive sample, comparing with the first item will be more efficient. 
+        # As we only have one positive sample, comparing with the first item will be more efficient. 
         gt_rank = (predictions >= predictions[:,0].reshape(-1,1)).sum(axis=-1)
         # if (gt_rank!=1).mean()<=0.05: # maybe all predictions are the same
         #     predictions_rnd = predictions.copy()
@@ -119,7 +119,7 @@ class BaseRunner(object):
         return optimizer
 
     def train(self, data_dict: Dict[str, BaseModel.Dataset]):
-        # model = data_dict['train'].model # 把model从Dataset转移到runner里面
+        # model = data_dict['train'].model # Transfer the model from Dataset to runner
         model = self.model
         main_metric_results, dev_results = list(), list()
         self._check_time(start=True)
@@ -186,7 +186,7 @@ class BaseRunner(object):
             model.optimizer = self._build_optimizer(model)
         dataset.actions_before_epoch()  # must sample before multi thread start
 
-        model.train() # 打开训练模式
+        model.train() # Enable training mode
         loss_lst = list()
         dl = DataLoader(dataset, batch_size=self.batch_size, shuffle=True, num_workers=self.num_workers,
                         collate_fn=dataset.collate_batch, pin_memory=self.pin_memory)
@@ -245,11 +245,11 @@ class BaseRunner(object):
         """
         self.model.eval()
         predictions = list()
-        # 测试的时候顺序取样，关闭shuffle
+        # Sequential sampling during testing, disable shuffle
         dl = DataLoader(dataset, batch_size=self.eval_batch_size, shuffle=False, num_workers=self.num_workers,
                         collate_fn=dataset.collate_batch, pin_memory=self.pin_memory)
         for batch in tqdm(dl, leave=False, ncols=100, mininterval=1, desc='Predict'):
-        # 取100个样，其中1个阳性，99个阴性
+        # Take 100 samples, including 1 positive and 99 negative
             if hasattr(self.model,'inference'):
                 prediction = dataset.model.inference(utils.batch_to_gpu(batch, self.model.device))['prediction']
             else:
